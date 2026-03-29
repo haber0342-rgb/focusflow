@@ -19,21 +19,30 @@
     <link rel="stylesheet" href="styles/focus.css">
     <link rel="stylesheet" href="styles/print.css" media="print">
     
-    <!-- CDN Libraries (Pinned Versions) -->
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js" onerror="alert('SortableJS failed to load')"></script>
+    <!-- CDN Libraries (Pinned Versions - Switched to jsDelivr for better compatibility) -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.5/main.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.5/main.min.js" onerror="alert('FullCalendar failed to load')"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.3/chart.umd.min.js" onerror="alert('Chart.js failed to load')"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" onerror="alert('jsPDF failed to load')"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" onerror="alert('html2canvas failed to load')"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js" onerror="alert('marked.js failed to load')"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.5/purify.min.js" onerror="alert('purify failed to load')"></script>
-    <script src="https://cdn.jsdelivr.net/npm/lucide@0.400.0/dist/umd/lucide.min.js" onerror="alert('Lucide failed to load')"></script>
-    <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js" onerror="alert('LZString failed to load')"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.5/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.5/dist/purify.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.400.0/dist/umd/lucide.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://apis.google.com/js/api.js" async defer></script>
 </head>
 <body>
+    <div id="failsafe-log" style="position:fixed;top:0;left:0;width:100%;background:#800;color:#fff;font-family:monospace;font-size:10px;z-index:10000;padding:4px;display:none;"></div>
+    <script>
+        window.onerror = function(msg, url, line) {
+            const el = document.getElementById('failsafe-log');
+            el.style.display = 'block';
+            el.innerHTML += '<div>ERROR: ' + msg + ' at ' + url + ':' + line + '</div>';
+        };
+        console.log("Failsafe logger active.");
+    </script>
     <div id="app" class="app-container">
         <!-- Sidebar Navigation (Desktop) -->
         <aside class="sidebar desktop-only">

@@ -49,7 +49,12 @@ export default class ReportsView {
     }
 
     async initCharts(container) {
-        if (!window.Chart) return;
+        if (!window.Chart) {
+            container.querySelectorAll('.chart-container').forEach(el => {
+                el.innerHTML += '<p class="text-dim" style="padding:20px;">Charts unavailable (Library block)</p>';
+            });
+            return;
+        }
 
         const { personal, shared } = data.getAllTasks();
         const allTasks = [...Object.values(personal), ...Object.values(shared)];
