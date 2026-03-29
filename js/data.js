@@ -22,11 +22,12 @@ class DataManager {
     get(keyType, userId = this.activeUserId) {
         const key = this.getStoreKey(keyType, userId);
         const data = localStorage.getItem(key);
+        const isTaskStore = keyType.includes('tasks') || keyType === 'shared';
         try {
-            return data ? JSON.parse(data) : (keyType.includes('tasks') ? {} : null);
+            return data ? JSON.parse(data) : (isTaskStore ? {} : null);
         } catch (e) {
             console.error(`Data: Error parsing ${key}`, e);
-            return keyType.includes('tasks') ? {} : null;
+            return isTaskStore ? {} : null;
         }
     }
 

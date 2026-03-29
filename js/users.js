@@ -34,7 +34,7 @@ class UserManager {
     }
 
     getActiveProfile() {
-        return this.users[this.activeUser];
+        return this.users[this.activeUser] || { name: 'FocusFlow User', color: '#6c63ff' };
     }
 }
 
