@@ -34,6 +34,15 @@
     <script src="https://apis.google.com/js/api.js" async defer></script>
 </head>
 <body>
+    <div id="failsafe-log" style="position:fixed;top:0;left:0;width:100%;background:#800;color:#fff;font-family:monospace;font-size:10px;z-index:10000;padding:4px;display:none;"></div>
+    <script>
+        window.onerror = function(msg, url, line) {
+            const el = document.getElementById('failsafe-log');
+            el.style.display = 'block';
+            el.innerHTML += '<div>ERROR: ' + msg + ' at ' + url + ':' + line + '</div>';
+        };
+        console.log("Failsafe logger active.");
+    </script>
     <div id="app" class="app-container">
         <!-- Sidebar Navigation (Desktop) -->
         <aside class="sidebar desktop-only">
