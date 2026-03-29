@@ -5,45 +5,78 @@ class App {
     constructor() {
         this.currentView = null;
         this.eventBus = document.createElement('div');
+        this.debugEl = null;
+        // Determine base path for dynamic imports (handles GitHub Pages subdirectories)
+        this.basePath = window.location.pathname.endsWith('/') 
+            ? window.location.pathname 
+            : window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
     }
 
     async init() {
-        console.log('FocusFlow: Initializing...');
+        this.setupDebugUI();
+        this.log(`FocusFlow: Initializing at ${this.basePath}...`);
         
-        // 1. Core Modules (Individual loading to prevent total failure)
-        const modules = ['./notifications.js', './shortcuts.js', './planning.js', './focus.js'];
-        for (const path of modules) {
-            try {
-                await import(path);
-            } catch (e) {
-                console.warn(`FocusFlow: Optional module "${path}" failed to load.`, e);
-            }
-        }
-
-        // 2. Data Initialization
         try {
+            // 0. Kill stale Service Workers
+            if ('serviceWorker' in navigator) {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                for (let reg of registrations) {
+                    await reg.unregister();
+                    this.log('FocusFlow: SW unregistered.');
+                }
+            }
+
+            // 1. Core Modules
+            const modules = ['notifications.js', 'shortcuts.js', 'planning.js', 'focus.js'];
+            for (const name of modules) {
+                try {
+                    await import(`./${name}`);
+                    this.log(`FocusFlow: Loaded ${name}`);
+                } catch (e) {
+                    this.log(`FocusFlow: Warn - ${name} fail: ${e.message}`);
+                }
+            }
+
+            // 2. Data Initialization
             data.initRollover();
-        } catch (e) {
-            console.error('FocusFlow: Data init failed.', e);
+            this.log('FocusFlow: Data ready.');
+
+            // 3. Intercept Share Links
+            await this.handleShareLink();
+
+            // 4. UI Setup
+            this.initLucide();
+            this.initNavigation();
+            
+            // 5. Router Registration
+            window.addEventListener('hashchange', () => this.route());
+            
+            // 6. Initial Route
+            await this.route();
+
+            this.log('FocusFlow: Init complete.');
+        } catch (err) {
+            this.log(`FocusFlow: FATAL - ${err.message}`, 'error');
         }
+    }
 
-        // 3. Intercept Share Links
-        await this.handleShareLink();
+    setupDebugUI() {
+        const container = document.getElementById('view-container');
+        if (!container) return;
+        this.debugEl = document.createElement('div');
+        this.debugEl.style.cssText = 'position:fixed;bottom:10px;right:10px;background:rgba(0,0,0,0.9);color:#0f0;padding:10px;font-size:10px;z-index:9999;max-height:200px;width:250px;overflow:auto;pointer-events:none;border-radius:8px;border:1px solid #333;font-family:monospace;';
+        document.body.appendChild(this.debugEl);
+    }
 
-        // 4. UI Setup
-        this.initLucide();
-        this.initNavigation();
-        
-        // 5. Router Registration
-        window.addEventListener('hashchange', () => this.route());
-        
-        // 6. Initial Route (Force immediate run)
-        this.route();
-
-        // 7. SW Registration
-        this.registerServiceWorker();
-
-        console.log('FocusFlow: Initialization finished.');
+    log(msg, type = 'info') {
+        console.log(msg);
+        if (this.debugEl) {
+            const line = document.createElement('div');
+            line.style.color = type === 'error' ? '#f00' : '#0f0';
+            line.innerText = `> ${msg}`;
+            this.debugEl.appendChild(line);
+            this.debugEl.scrollTop = this.debugEl.scrollHeight;
+        }
     }
 
     async handleShareLink() {
@@ -53,24 +86,23 @@ class App {
             try {
                 const { default: sharing } = await import('./sharing.js');
                 await sharing.handleImport(payload);
+                // Fix: don't strip the rest of the URL state if we can help it
                 history.replaceState(null, document.title, window.location.pathname + window.location.search);
             } catch (err) {
-                console.error('FocusFlow: Share process failed.', err);
+                this.log(`FocusFlow: Share fail: ${err.message}`, 'error');
             }
         }
     }
 
     async route() {
         const hash = window.location.hash || '#dashboard';
-        const viewName = hash.startsWith('#') ? hash.substring(1) : 'dashboard';
+        const viewName = hash.startsWith('#') ? hash.split('=')[0].substring(1) : 'dashboard';
         
-        // Handle route parameters (e.g., #share=) by prioritizing core views
         const validViews = ['dashboard', 'list', 'kanban', 'eisenhower', 'calendar', 'reports', 'settings'];
         const targetView = validViews.includes(viewName) ? viewName : 'dashboard';
 
-        console.log(`FocusFlow: Navigating to "${targetView}"`);
+        this.log(`FocusFlow: Nav to "${targetView}"`);
 
-        // Sync Sidebar UI
         document.querySelectorAll('.nav-item').forEach(el => {
             el.classList.toggle('active', el.dataset.view === targetView);
         });
@@ -82,10 +114,14 @@ class App {
         const container = document.getElementById('view-container');
         if (!container) return;
         
-        container.innerHTML = '<div style="padding: 20px; color: var(--text-dim);">Loading...</div>';
+        container.innerHTML = `<div style="padding: 20px; color: var(--text-dim);">Loading ${name}...</div>`;
         
         try {
-            const module = await import(`./views/${name}.js`);
+            // Use root-relative path for reliability on GitHub Pages
+            const modulePath = `${this.basePath}js/views/${name}.js`;
+            this.log(`FocusFlow: Importing ${modulePath}`);
+            const module = await import(modulePath);
+            
             if (this.currentView && this.currentView.destroy) {
                 this.currentView.destroy();
             }
@@ -97,39 +133,35 @@ class App {
                 container.innerHTML = '';
                 container.appendChild(viewEl);
                 this.initLucide();
+                this.log(`FocusFlow: ${name} rendered.`);
+            } else {
+                this.log(`FocusFlow: ${name} render() didn't return element`, 'error');
             }
         } catch (err) {
-            console.error(`FocusFlow: View "${name}" load error.`, err);
+            this.log(`FocusFlow: ${name} Error: ${err.message}`, 'error');
             container.innerHTML = `
                 <div class="card" style="border-top: 4px solid var(--accent-danger);">
-                    <h2>Unable to load view</h2>
+                    <h2>Load Error</h2>
                     <p class="text-muted">${err.message}</p>
-                    <button class="btn btn-primary" onclick="window.location.reload()" style="margin-top: 16px;">Reload App</button>
+                    <p style="font-size:10px;color:var(--text-dim);">${err.stack}</p>
                 </div>
             `;
         }
     }
 
     initLucide() {
-        if (window.lucide) window.lucide.createIcons();
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
     }
 
     initNavigation() {
         document.querySelectorAll('.nav-item').forEach(el => {
-            el.addEventListener('click', (e) => {
-                const link = e.target.closest('a');
-                if (link && link.getAttribute('href').startsWith('#')) {
-                    // Hash change will trigger route()
-                }
-            });
+            el.onclick = () => {
+                const view = el.dataset.view;
+                if (view) window.location.hash = view;
+            };
         });
-    }
-
-    registerServiceWorker() {
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js')
-                .catch(err => console.warn('FocusFlow: SW registration skipped.', err));
-        }
     }
 
     on(event, callback) { this.eventBus.addEventListener(event, callback); }
