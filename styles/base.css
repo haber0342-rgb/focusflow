@@ -1,0 +1,90 @@
+/* styles/base.css - Resets, Variables, Typography */
+
+:root {
+    /* Colors */
+    --bg-main: #0f0f14;
+    --bg-surface: #1a1a24;
+    --bg-panel: #22222e;
+    --bg-input: #2a2a3a;
+    
+    --text-main: #e0e0e6;
+    --text-muted: #a0a0b0;
+    --text-dim: #707080;
+    
+    --accent-primary: #6c63ff; /* Electric Indigo */
+    --accent-secondary: #f5a623; /* Soft Amber */
+    --accent-success: #2ecc71;
+    --accent-danger: #e74c3c;
+    
+    /* Eisenhower Quadrants */
+    --q1-color: #ff6b6b; /* Urgent + Important */
+    --q2-color: #4ecdc4; /* Not Urgent + Important */
+    --q3-color: #ffe66d; /* Urgent + Not Important */
+    --q4-color: #a0a0b0; /* Not Urgent + Not Important */
+    
+    /* Transitions */
+    --transition-fast: 150ms ease;
+    --transition-norm: 200ms ease;
+    
+    /* Layout */
+    --sidebar-width: 240px;
+    --bottom-nav-height: 60px;
+    --border-radius: 12px;
+    --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    line-height: 1.5;
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+}
+
+h1, h2, h3, h4 {
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+h1 { font-size: 24px; }
+h2 { font-size: 20px; }
+h3 { font-size: 18px; }
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+button {
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    background: none;
+}
+
+input, textarea, select {
+    font-family: inherit;
+    font-size: inherit;
+}
+
+.hidden {
+    display: none !important;
+}
+
+kbd {
+    background: var(--bg-panel);
+    border: 1px solid var(--text-dim);
+    border-radius: 4px;
+    padding: 2px 5px;
+    font-size: 10px;
+    font-family: monospace;
+    color: var(--text-muted);
+}

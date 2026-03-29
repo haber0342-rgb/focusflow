@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FocusFlow | Productivity Monitor & Task Manager</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#6c63ff">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles/base.css">
+    <link rel="stylesheet" href="styles/layout.css">
+    <link rel="stylesheet" href="styles/components.css">
+    <link rel="stylesheet" href="styles/focus.css">
+    <link rel="stylesheet" href="styles/print.css" media="print">
+    
+    <!-- CDN Libraries (Pinned Versions) -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.5/main.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.5/main.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.3/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.5/purify.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.400.0/dist/umd/lucide.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://apis.google.com/js/api.js" async defer></script>
+</head>
+<body>
+    <div id="app" class="app-container">
+        <!-- Sidebar Navigation (Desktop) -->
+        <aside class="sidebar desktop-only">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i data-lucide="zap" class="accent-icon"></i>
+                    <span>FocusFlow</span>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#dashboard" class="nav-item active" data-view="dashboard">
+                    <i data-lucide="layout-dashboard"></i> <span>Dashboard</span>
+                </a>
+                <a href="#list" class="nav-item" data-view="list">
+                    <i data-lucide="list-todo"></i> <span>List View</span>
+                </a>
+                <a href="#kanban" class="nav-item" data-view="kanban">
+                    <i data-lucide="trello"></i> <span>Kanban Board</span>
+                </a>
+                <a href="#eisenhower" class="nav-item" data-view="eisenhower">
+                    <i data-lucide="grid-3x3"></i> <span>Eisenhower</span>
+                </a>
+                <a href="#calendar" class="nav-item" data-view="calendar">
+                    <i data-lucide="calendar"></i> <span>Calendar</span>
+                </a>
+                <a href="#reports" class="nav-item" data-view="reports">
+                    <i data-lucide="bar-chart-3"></i> <span>Reports</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="#settings" class="nav-item" data-view="settings">
+                    <i data-lucide="settings"></i> <span>Settings</span>
+                </a>
+                <div id="sync-status" class="sync-indicator idle" title="Sync Idle">
+                    <i data-lucide="refresh-cw"></i>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main id="main-content" class="content-area">
+            <!-- Dynamic view content injected here -->
+            <div id="view-container"></div>
+        </main>
+
+        <!-- Bottom Navigation (Mobile) -->
+        <nav class="bottom-nav mobile-only">
+            <a href="#dashboard" class="nav-item active" data-view="dashboard">
+                <i data-lucide="layout-dashboard"></i>
+            </a>
+            <a href="#list" class="nav-item" data-view="list">
+                <i data-lucide="list-todo"></i>
+            </a>
+            <a href="#kanban" class="nav-item" data-view="kanban">
+                <i data-lucide="trello"></i>
+            </a>
+            <a href="#eisenhower" class="nav-item" data-view="eisenhower">
+                <i data-lucide="grid-3x3"></i>
+            </a>
+            <a href="#calendar" class="nav-item" data-view="calendar">
+                <i data-lucide="calendar"></i>
+            </a>
+            <a href="#reports" class="nav-item" data-view="reports">
+                <i data-lucide="bar-chart-3"></i>
+            </a>
+            <a href="#settings" class="nav-item" data-view="settings">
+                <i data-lucide="settings"></i>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Modals & Overlays -->
+    <div id="modal-root"></div>
+    <div id="toast-container"></div>
+    <div id="keyboard-help" class="modal hidden"></div>
+    <div id="focus-overlay" class="focus-overlay hidden"></div>
+    <div id="planning-overlay" class="modal hidden"></div>
+    <div id="conflict-banner" class="conflict-banner hidden"></div>
+
+    <!-- Scripts -->
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>

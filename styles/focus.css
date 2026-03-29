@@ -1,0 +1,109 @@
+/* styles/focus.css - Focus Mode Overlay */
+
+.focus-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--bg-main);
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+}
+
+.focus-task-anchor {
+    position: absolute;
+    top: 40px;
+    text-align: center;
+    max-width: 800px;
+}
+
+.focus-task-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--accent-primary);
+    margin-bottom: 8px;
+}
+
+.focus-task-desc {
+    font-size: 16px;
+    color: var(--text-muted);
+}
+
+.focus-timer-container {
+    text-align: center;
+}
+
+.focus-timer {
+    font-size: 120px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-main);
+    margin: 40px 0;
+}
+
+.focus-controls {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.focus-footer {
+    position: absolute;
+    bottom: 40px;
+    display: flex;
+    gap: 32px;
+    align-items: center;
+}
+
+.ambient-controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background-color: var(--bg-surface);
+    padding: 8px 16px;
+    border-radius: 20px;
+}
+
+.ambient-btn {
+    color: var(--text-muted);
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.ambient-btn.active {
+    color: var(--accent-primary);
+    background-color: var(--bg-panel);
+}
+
+.drift-btn {
+    color: var(--text-dim);
+    font-size: 14px;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.drift-btn:hover {
+    color: var(--accent-secondary);
+}
+
+/* Procrastination Prompt */
+.cbt-prompt {
+    text-align: center;
+    max-width: 500px;
+    animation: fadeIn 0.5s ease;
+}
+
+.cbt-prompt h2 {
+    margin-bottom: 24px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}

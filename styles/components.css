@@ -1,0 +1,169 @@
+/* styles/components.css - Cards, Buttons, Modals, Toasts, Forms, Eisenhower */
+
+/* Cards */
+.card {
+    background-color: var(--bg-surface);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    box-shadow: var(--card-shadow);
+    border: 1px solid var(--bg-panel);
+    margin-bottom: 20px;
+    transition: var(--transition-norm);
+}
+
+.card:hover {
+    border-color: var(--accent-primary);
+}
+
+/* Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: var(--transition-fast);
+}
+
+.btn-primary {
+    background-color: var(--accent-primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    filter: brightness(1.1);
+}
+
+.btn-secondary {
+    background-color: var(--bg-panel);
+    color: var(--text-main);
+}
+
+.btn-secondary:hover {
+    background-color: var(--bg-input);
+}
+
+/* Forms */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.form-control {
+    width: 100%;
+    background-color: var(--bg-input);
+    border: 1px solid var(--bg-panel);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text-main);
+    transition: var(--transition-fast);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+}
+
+/* Modals */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: var(--bg-surface);
+    border-radius: var(--border-radius);
+    padding: 32px;
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* Toasts */
+#toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.toast {
+    background-color: var(--bg-surface);
+    border-left: 4px solid var(--accent-primary);
+    padding: 16px 24px;
+    border-radius: 8px;
+    color: var(--text-main);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+/* Eisenhower Matrix */
+.eisenhower-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 20px;
+    height: calc(100vh - 120px);
+}
+
+.quadrant {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg-surface);
+    border-radius: var(--border-radius);
+    padding: 16px;
+    border: 1px solid var(--bg-panel);
+}
+
+.quadrant-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.quadrant-list {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 100px;
+}
+
+.q1 { border-top: 4px solid var(--q1-color); }
+.q2 { border-top: 4px solid var(--q2-color); }
+.q3 { border-top: 4px solid var(--q3-color); }
+.q4 { border-top: 4px solid var(--q4-color); }
+
+/* Markdown Styles */
+.markdown-content h1, .markdown-content h2 { margin: 16px 0 8px; }
+.markdown-content p { margin-bottom: 12px; }
+.markdown-content ul, .markdown-content ol { margin: 0 0 12px 20px; }
+.markdown-content code { background: var(--bg-input); padding: 2px 4px; border-radius: 4px; }
+.markdown-content pre { background: var(--bg-input); padding: 12px; border-radius: 8px; overflow-x: auto; }
