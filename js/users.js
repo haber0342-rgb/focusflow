@@ -11,8 +11,13 @@ class UserManager {
     }
 
     loadUsers() {
-        const data = localStorage.getItem(`${this.DB_PREFIX}users`);
-        return data ? JSON.parse(data) : { 'default': { name: 'FocusFlow User', color: '#6c63ff' } };
+        const raw = localStorage.getItem(`${this.DB_PREFIX}users`);
+        try {
+            const parsed = raw ? JSON.parse(raw) : null;
+            return (parsed && typeof parsed === 'object') ? parsed : { 'default': { name: 'FocusFlow User', color: '#6c63ff' } };
+        } catch (e) {
+            return { 'default': { name: 'FocusFlow User', color: '#6c63ff' } };
+        }
     }
 
     loadActiveUser() {

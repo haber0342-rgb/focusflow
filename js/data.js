@@ -21,10 +21,14 @@ class DataManager {
 
     get(keyType, userId = this.activeUserId) {
         const key = this.getStoreKey(keyType, userId);
-        const data = localStorage.getItem(key);
+        const raw = localStorage.getItem(key);
         const isTaskStore = keyType.includes('tasks') || keyType === 'shared';
+        
         try {
-            return data ? JSON.parse(data) : (isTaskStore ? {} : null);
+            const parsed = raw ? JSON.parse(raw) : null;
+            // If parsed is null or not an object (for task stores), return fallback
+            if (isTaskStore) return (parsed && typeof parsed === 'object') ? parsed : {};
+            return parsed;
         } catch (e) {
             console.error(`Data: Error parsing ${key}`, e);
             return isTaskStore ? {} : null;
