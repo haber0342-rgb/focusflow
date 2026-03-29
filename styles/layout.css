@@ -19,6 +19,12 @@
     z-index: 100;
 }
 
+.nav-item i, .nav-item svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
 .sidebar-header {
     padding: 24px;
 }

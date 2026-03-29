@@ -229,7 +229,7 @@ class FocusController {
     }
 
     finishSession() {
-        const timeSpent = Math.floor(((task.duration || 25) * 60 - this.timeLeft) / 60);
+        const timeSpent = Math.floor(((this.activeTask.duration || 25) * 60 - this.timeLeft) / 60);
         this.sessionLog.end = new Date().toISOString();
         this.sessionLog.timeSpent = timeSpent;
         
