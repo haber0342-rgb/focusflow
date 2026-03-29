@@ -35,7 +35,7 @@ class TaskUI {
                 ${task.priority ? `<span class="meta-priority priority-${task.priority.toLowerCase()}">${task.priority}</span>` : ''}
                 ${task.category ? `<span class="meta-item"><i data-lucide="tag"></i> ${task.category}</span>` : ''}
                 ${task.dueDate ? `<span class="meta-item"><i data-lucide="calendar"></i> ${this.formatDate(task.dueDate)}</span>` : ''}
-                ${task.rolloverDate ? `<span class="meta-rollover" title="Rolled over"><i data-lucide="rotate-cw"></i></span>` : ''}
+                ${task.rolloverIndicator ? `<span class="meta-rollover" title="${task.rolloverIndicator}"><i data-lucide="rotate-cw"></i> ${task.rolloverIndicator}</span>` : ''}
             </div>
 
             ${task.notes ? `

@@ -26,7 +26,12 @@ class TaskForm {
                 <form id="task-form">
                     <div class="form-group">
                         <label class="form-label">Task Description *</label>
-                        <input type="text" id="task-text" class="form-control" placeholder="What needs to be done?" required value="${taskToEdit?.text || ''}">
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" id="task-text" class="form-control" placeholder="What needs to be done?" required value="${taskToEdit?.text || ''}">
+                            <button type="button" class="btn btn-secondary" id="ai-suggest-btn" title="Get AI Suggestions">
+                                <i data-lucide="sparkles"></i>
+                            </button>
+                        </div>
                     </div>
                     
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
@@ -163,6 +168,38 @@ class TaskForm {
 
         cancelBtn.addEventListener('click', () => this.close());
         
+        const aiBtn = this.modal.querySelector('#ai-suggest-btn');
+        aiBtn.onclick = async () => {
+            const text = document.getElementById('task-text').value;
+            if (!text) {
+                window.app.emit('notify', { message: 'Enter a task description first', type: 'info' });
+                return;
+            }
+
+            aiBtn.disabled = true;
+            const originalHtml = aiBtn.innerHTML;
+            aiBtn.innerHTML = '<i data-lucide="loader"></i>';
+            if (window.lucide) window.lucide.createIcons();
+
+            try {
+                const { default: gemini } = await import('./integrations/gemini.js');
+                const meta = await gemini.suggestTaskMeta(text);
+                
+                if (meta.duration) document.getElementById('task-duration').value = meta.duration;
+                if (meta.priority) document.getElementById('task-priority').value = meta.priority;
+                if (meta.quadrant) document.getElementById('task-quadrant').value = meta.quadrant;
+                if (meta.category) document.getElementById('task-category').value = meta.category;
+                
+                window.app.emit('notify', { message: 'AI suggestions applied!', type: 'success' });
+            } catch (err) {
+                window.app.emit('notify', { message: 'AI suggestions failed', type: 'error' });
+            } finally {
+                aiBtn.disabled = false;
+                aiBtn.innerHTML = originalHtml;
+                if (window.lucide) window.lucide.createIcons();
+            }
+        };
+
         form.addEventListener('submit', (e) => {
             e.preventDefault();
             this.handleSubmit(taskToEdit);

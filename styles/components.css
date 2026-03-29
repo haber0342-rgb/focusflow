@@ -166,4 +166,21 @@
 .markdown-content p { margin-bottom: 12px; }
 .markdown-content ul, .markdown-content ol { margin: 0 0 12px 20px; }
 .markdown-content code { background: var(--bg-input); padding: 2px 4px; border-radius: 4px; }
-.markdown-content pre { background: var(--bg-input); padding: 12px; border-radius: 8px; overflow-x: auto; }
+.meta-priority {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 10px;
+}
+
+.meta-rollover {
+    color: var(--accent-secondary);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+}
+
+.priority-low { color: var(--text-dim); }
+.priority-medium { color: var(--accent-primary); }
+.priority-high { color: var(--accent-secondary); }
+.priority-critical { color: var(--accent-danger); }

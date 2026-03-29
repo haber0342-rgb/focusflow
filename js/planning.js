@@ -55,6 +55,13 @@ class PlanningController {
                     ${rolledTasks.length === 0 ? '<p class="text-dim">No tasks rolled over today.</p>' : ''}
                 </div>
 
+                <div style="margin-top: 24px; border-top: 1px solid var(--bg-panel); padding-top: 16px;">
+                    <button class="btn btn-secondary w-full" id="suggest-top-3">
+                        <i data-lucide="sparkles"></i> Suggest Today's Top 3
+                    </button>
+                    <div id="top-3-suggestion" class="text-muted" style="margin-top: 12px; font-size: 13px;"></div>
+                </div>
+
                 <div style="margin-top: 32px; display: flex; justify-content: flex-end; gap: 12px;">
                     <button class="btn btn-secondary" id="planning-close">Close</button>
                     <button class="btn btn-primary" id="planning-ready">I'm Ready</button>
@@ -92,6 +99,39 @@ class PlanningController {
         this.overlay.classList.remove('hidden');
         this.overlay.querySelector('#planning-close').onclick = () => this.overlay.classList.add('hidden');
         this.overlay.querySelector('#planning-ready').onclick = () => this.overlay.classList.add('hidden');
+
+        // Suggest Top 3 Logic
+        this.overlay.querySelector('#suggest-top-3').onclick = async () => {
+            const btn = this.overlay.querySelector('#suggest-top-3');
+            const suggestionEl = this.overlay.querySelector('#top-3-suggestion');
+            const originalHtml = btn.innerHTML;
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i data-lucide="loader"></i> Suggesting...';
+            if (window.lucide) window.lucide.createIcons();
+
+            const { personal, shared } = data.getAllTasks();
+            const allPending = [...Object.values(personal), ...Object.values(shared)]
+                .filter(t => t.status === 'todo' || t.status === 'in_progress');
+
+            try {
+                const { default: gemini } = await import('./integrations/gemini.js');
+                const suggestion = await gemini.suggestTop3(JSON.stringify(allPending));
+                suggestionEl.innerText = suggestion;
+            } catch (err) {
+                // Static Fallback: Sort by priority then due date
+                const priorities = { 'Critical': 4, 'High': 3, 'Medium': 2, 'Low': 1 };
+                const top3 = allPending
+                    .sort((a, b) => (priorities[b.priority] || 0) - (priorities[a.priority] || 0))
+                    .slice(0, 3)
+                    .map(t => t.text);
+                suggestionEl.innerText = `Based on your list, focus on: ${top3.join(', ')}`;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+                if (window.lucide) window.lucide.createIcons();
+            }
+        };
     }
 
     /**

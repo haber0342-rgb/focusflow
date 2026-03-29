@@ -213,13 +213,19 @@ class FocusController {
             filter.type = 'lowpass';
             filter.frequency.value = 400;
             
+            const noiseGain = this.audioCtx.createGain();
+            noiseGain.gain.value = 0.5;
+            
             const lfo = this.audioCtx.createOscillator();
             const lfoGain = this.audioCtx.createGain();
-            lfo.frequency.value = 0.5;
-            lfoGain.gain.value = 0.2;
-            lfo.connect(lfoGain.gain);
+            lfo.frequency.value = 0.2; // Slow variation
+            lfoGain.gain.value = 0.2;  // Depth of variation
             
-            noise.connect(filter);
+            lfo.connect(lfoGain);
+            lfoGain.connect(noiseGain.gain);
+            
+            noise.connect(noiseGain);
+            noiseGain.connect(filter);
             filter.connect(this.audioCtx.destination);
             lfo.start();
         }

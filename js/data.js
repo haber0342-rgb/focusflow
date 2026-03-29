@@ -163,11 +163,10 @@ class DataManager {
                     task.notes = (task.notes || '') + `\n\n[Auto-archived: Not started within ${task.rolloverLimit} days]`;
                 } else {
                     // Indefinite or within limits -> roll over
+                    const prevDate = task.rolloverDate || 'yesterday';
                     task.rolloverCount = (task.rolloverCount || 0) + 1;
                     task.rolloverDate = todayStr;
-                    // Add visual indicator if not already present
-                    const indicator = `Rolled over from ${task.lastActiveDate || 'yesterday'}`;
-                    task.lastActiveDate = todayStr;
+                    task.rolloverIndicator = `Rolled over from ${prevDate}`;
                 }
                 changed = true;
             });

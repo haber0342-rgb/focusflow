@@ -118,9 +118,10 @@ class ShortcutManager {
                         <kbd>CTRL + Z</kbd>
                     </div>
                 </div>
-                <button class="btn btn-primary" style="margin-top: 32px; width: 100%;" onclick="document.getElementById('keyboard-help').classList.add('hidden')">Close</button>
+                <button class="btn btn-primary" style="margin-top: 32px; width: 100%;" id="close-shortcuts-btn">Close</button>
             </div>
         `;
+        helpEl.querySelector('#close-shortcuts-btn').onclick = () => helpEl.classList.add('hidden');
         helpEl.classList.remove('hidden');
     }
 }
