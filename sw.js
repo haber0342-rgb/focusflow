@@ -1,6 +1,6 @@
 /**
  * sw.js - FocusFlow Service Worker
- * Handles offline caching for same-origin static assets.
+ * Handles offline caching with path-agnostic logic for subdirectories.
  */
 
 const CACHE_NAME = 'focusflow-v1';
@@ -30,6 +30,7 @@ const ASSETS = [
     './js/views/eisenhower.js',
     './js/views/calendar.js',
     './js/views/reports.js',
+    './js/views/settings.js',
     './js/integrations/google-auth.js',
     './js/integrations/google-drive.js',
     './js/integrations/google-calendar.js',
@@ -44,22 +45,32 @@ self.addEventListener('install', (event) => {
     );
 });
 
+self.addEventListener('activate', (event) => {
+    event.waitUntil(self.clients.claim());
+});
+
 self.addEventListener('fetch', (event) => {
-    const url = new URL(event.request.url);
-    
-    // Cache-first for same-origin static assets
-    if (ASSETS.includes(url.pathname.replace(/^\/focusflow/, '.'))) {
-        event.respondWith(
-            caches.match(event.request).then((response) => {
-                return response || fetch(event.request);
-            })
-        );
-    } else {
-        // Network-first for everything else (CDNs, Google APIs, Gemini)
-        event.respondWith(
-            fetch(event.request).catch(() => {
-                return caches.match(event.request);
-            })
-        );
-    }
+    // Only handle same-origin requests
+    if (new URL(event.request.url).origin !== self.location.origin) return;
+
+    event.respondWith(
+        caches.match(event.request).then((response) => {
+            // Return cached asset or fetch from network
+            return response || fetch(event.request).then((fetchResponse) => {
+                // Optionally cache new successful same-origin requests
+                if (fetchResponse.ok) {
+                    return caches.open(CACHE_NAME).then((cache) => {
+                        cache.put(event.request, fetchResponse.clone());
+                        return fetchResponse;
+                    });
+                }
+                return fetchResponse;
+            });
+        }).catch(() => {
+            // Fallback for offline mode: return index.html for navigation requests
+            if (event.request.mode === 'navigate') {
+                return caches.match('./index.html');
+            }
+        })
+    );
 });

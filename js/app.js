@@ -9,103 +9,83 @@ class App {
 
     async init() {
         console.log('FocusFlow: Initializing...');
-        try {
-            // 1. Core Modules (Load after window.app exists)
-            console.log('FocusFlow: Loading core modules...');
-            const modules = ['./notifications.js', './shortcuts.js', './planning.js', './focus.js'];
-            for (const path of modules) {
-                try {
-                    await import(path);
-                    console.log(`FocusFlow: Module "${path}" loaded.`);
-                } catch (e) {
-                    console.error(`FocusFlow: Failed to load module "${path}":`, e);
-                }
+        
+        // 1. Core Modules (Individual loading to prevent total failure)
+        const modules = ['./notifications.js', './shortcuts.js', './planning.js', './focus.js'];
+        for (const path of modules) {
+            try {
+                await import(path);
+            } catch (e) {
+                console.warn(`FocusFlow: Optional module "${path}" failed to load.`, e);
             }
-            console.log('FocusFlow: Core modules loading process finished.');
-
-            // 2. Initialize Data Rollover
-            data.initRollover();
-
-            // 3. #share= interception (Highest Priority)
-            await this.handleShareLink();
-
-            // 4. Initialize UI Components
-            this.initLucide();
-            this.initNavigation();
-            
-            // 5. Register Router
-            window.addEventListener('hashchange', () => this.route());
-            
-            // 6. Initial Route
-            this.route();
-
-            // 7. Register Service Worker
-            this.registerServiceWorker();
-
-            console.log('FocusFlow: Initialization complete.');
-        } catch (err) {
-            console.error('FocusFlow: Initialization failed:', err);
         }
+
+        // 2. Data Initialization
+        try {
+            data.initRollover();
+        } catch (e) {
+            console.error('FocusFlow: Data init failed.', e);
+        }
+
+        // 3. Intercept Share Links
+        await this.handleShareLink();
+
+        // 4. UI Setup
+        this.initLucide();
+        this.initNavigation();
+        
+        // 5. Router Registration
+        window.addEventListener('hashchange', () => this.route());
+        
+        // 6. Initial Route (Force immediate run)
+        this.route();
+
+        // 7. SW Registration
+        this.registerServiceWorker();
+
+        console.log('FocusFlow: Initialization finished.');
     }
 
-    /**
-     * Intercepts #share= fragment before the router fires.
-     */
     async handleShareLink() {
         const hash = window.location.hash;
         if (hash.startsWith('#share=')) {
-            console.log('FocusFlow: Share link detected.');
             const payload = hash.replace('#share=', '');
-            
             try {
-                // Dynamically import sharing logic to process the payload
                 const { default: sharing } = await import('./sharing.js');
                 await sharing.handleImport(payload);
-                
-                // Clear the fragment from URL without triggering a reload
                 history.replaceState(null, document.title, window.location.pathname + window.location.search);
             } catch (err) {
-                console.error('FocusFlow: Failed to process share link:', err);
+                console.error('FocusFlow: Share process failed.', err);
             }
         }
     }
 
-    /**
-     * Simple hash-based router.
-     */
     async route() {
         const hash = window.location.hash || '#dashboard';
-        const viewName = hash.substring(1);
+        const viewName = hash.startsWith('#') ? hash.substring(1) : 'dashboard';
         
-        console.log(`FocusFlow: Routing to "${viewName}"`);
+        // Handle route parameters (e.g., #share=) by prioritizing core views
+        const validViews = ['dashboard', 'list', 'kanban', 'eisenhower', 'calendar', 'reports', 'settings'];
+        const targetView = validViews.includes(viewName) ? viewName : 'dashboard';
 
-        // Update Nav UI
+        console.log(`FocusFlow: Navigating to "${targetView}"`);
+
+        // Sync Sidebar UI
         document.querySelectorAll('.nav-item').forEach(el => {
-            el.classList.toggle('active', el.dataset.view === viewName);
+            el.classList.toggle('active', el.dataset.view === targetView);
         });
 
-        // Load View
-        try {
-            await this.loadView(viewName);
-        } catch (err) {
-            console.error(`FocusFlow: Failed to load view "${viewName}":`, err);
-        }
+        await this.loadView(targetView);
     }
 
     async loadView(name) {
         const container = document.getElementById('view-container');
-        if (!container) {
-            console.error('FocusFlow: #view-container not found!');
-            return;
-        }
+        if (!container) return;
         
-        container.innerHTML = '<div class="text-dim">Loading view...</div>';
-        console.log(`FocusFlow: Loading view module "./views/${name}.js"`);
+        container.innerHTML = '<div style="padding: 20px; color: var(--text-dim);">Loading...</div>';
         
         try {
             const module = await import(`./views/${name}.js`);
-            console.log(`FocusFlow: Module "./views/${name}.js" loaded.`);
-
             if (this.currentView && this.currentView.destroy) {
                 this.currentView.destroy();
             }
@@ -117,32 +97,29 @@ class App {
                 container.innerHTML = '';
                 container.appendChild(viewEl);
                 this.initLucide();
-                console.log(`FocusFlow: View "${name}" rendered.`);
-            } else {
-                console.error(`FocusFlow: View "${name}" did not return an HTMLElement.`, viewEl);
-                container.innerHTML = `<div class="card"><h2>Error</h2><p>View "${name}" failed to render correctly.</p></div>`;
             }
         } catch (err) {
-            console.error(`FocusFlow: Failed to load view "${name}":`, err);
-            container.innerHTML = `<div class="card"><h2>View "${name}" is under construction.</h2><p class="text-muted">${err.message}</p></div>`;
-            throw err;
+            console.error(`FocusFlow: View "${name}" load error.`, err);
+            container.innerHTML = `
+                <div class="card" style="border-top: 4px solid var(--accent-danger);">
+                    <h2>Unable to load view</h2>
+                    <p class="text-muted">${err.message}</p>
+                    <button class="btn btn-primary" onclick="window.location.reload()" style="margin-top: 16px;">Reload App</button>
+                </div>
+            `;
         }
     }
 
     initLucide() {
-        if (window.lucide) {
-            window.lucide.createIcons();
-        }
+        if (window.lucide) window.lucide.createIcons();
     }
 
     initNavigation() {
-        // Handle nav clicks to ensure smooth routing
         document.querySelectorAll('.nav-item').forEach(el => {
             el.addEventListener('click', (e) => {
-                // Lucide icons might be the target
                 const link = e.target.closest('a');
                 if (link && link.getAttribute('href').startsWith('#')) {
-                    // Default browser hash change behavior is fine
+                    // Hash change will trigger route()
                 }
             });
         });
@@ -150,26 +127,15 @@ class App {
 
     registerServiceWorker() {
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('FocusFlow: SW registered.'))
-                    .catch(err => console.error('FocusFlow: SW registration failed.', err));
-            });
+            navigator.serviceWorker.register('./sw.js')
+                .catch(err => console.warn('FocusFlow: SW registration skipped.', err));
         }
     }
 
-    // Event Bus Helpers
-    on(event, callback) {
-        this.eventBus.addEventListener(event, callback);
-    }
-
-    emit(event, detail) {
-        this.eventBus.dispatchEvent(new CustomEvent(event, { detail }));
-    }
+    on(event, callback) { this.eventBus.addEventListener(event, callback); }
+    emit(event, detail) { this.eventBus.dispatchEvent(new CustomEvent(event, { detail })); }
 }
 
-// Global App Instance
 window.app = new App();
 window.app.init();
-
 export default window.app;
